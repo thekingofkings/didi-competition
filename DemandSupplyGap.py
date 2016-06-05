@@ -44,6 +44,12 @@ def calculateDemandSupplyGap():
 				if region_id not in ORDERS_MAP:
 					ORDERS_MAP[region_id] = np.zeros(144)
 
-				ORDERS_MAP[region_id][tid] += 1 if driver_id == "NULL" else -1
+				ORDERS_MAP[region_id][tid] += 1 if driver_id == "NULL" else 0
 				
 		DATE_ORDERS_MAP[f[-10:]] = ORDERS_MAP
+	return DATE_ORDERS_MAP
+
+
+r = calculateDemandSupplyGap()
+import pickle
+pickle.dump(r, open("ORDERS_GAP", 'w'))
