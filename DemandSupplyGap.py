@@ -63,7 +63,7 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="test"):
                     print time_series_type
                     raise NameError("Wrong time series type!")
                 
-        DATE_ORDERS_MAP[f[-10:]] = ORDERS_MAP
+        DATE_ORDERS_MAP[date] = ORDERS_MAP
     return DATE_ORDERS_MAP
 
 
