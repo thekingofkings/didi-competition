@@ -18,7 +18,7 @@ import re
 
 
 
-def calculateDemandSupplyGap(time_series_type="gap", train_or_test="test"):
+def calculateDemandSupplyGap(time_series_type="gap", train_or_test="train"):
     """
     Return a nested map.
     First level is DATE -> second_level_map.
@@ -51,7 +51,7 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="test"):
                 tid = getTimeSlotFromTimestamp(time, date)
 
                 if region_id not in ORDERS_MAP:
-                    ORDERS_MAP[region_id] = np.zeros(144)
+                    ORDERS_MAP[region_id] = np.ones(144) * -1
 
                 if time_series_type == "gap":
                     ORDERS_MAP[region_id][tid] += 1 if driver_id == "NULL" else 0
@@ -62,9 +62,34 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="test"):
                 else:
                     print time_series_type
                     raise NameError("Wrong time series type!")
-                
+        
+        for region in ORDERS_MAP:
+            ORDERS_MAP[region] = map(lambda x: x+1 if x != -1 else x, ORDERS_MAP[region])
         DATE_ORDERS_MAP[date] = ORDERS_MAP
     return DATE_ORDERS_MAP
+
+
+
+
+
+def weeklyPattern(DATE_ORDERS_MAP):
+    """
+    Calculate weekly average
+    """
+    weekly_orders = [ {} for i in range(7) ]
+    weekly_orders_cnt = np.zeros(7)
+    for date in DATE_ORDERS_MAP:
+        wd = getWeekDay(date)   # weekday has value 0 - 6 (Mon - Sun)
+        weekly_orders[wd] = sumValue_2dicts(DATE_ORDERS_MAP[date], weekly_orders[wd])
+        weekly_orders_cnt[wd] += 1.0
+
+    for idx, cnt in enumerate(weekly_orders_cnt):
+        for region in weekly_orders[idx]:
+            weekly_orders[idx][region] /= cnt
+
+    return weekly_orders
+
+
 
 
 

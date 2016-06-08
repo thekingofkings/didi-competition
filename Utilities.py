@@ -13,6 +13,7 @@ Hongjian
 """
 
 from PathConfig import *
+import numpy as np
 
 
 def getRegionMap():
@@ -41,3 +42,40 @@ def getTimeSlotFromTimestamp(timestr, date = None):
         return mins / 10
     else:
         return -1
+
+
+
+def getWeekDay(date):
+    """
+    Return weekday from date string.
+    Monday is 0, Sunday is 6.
+    """
+    from datetime import datetime
+    t = datetime.strptime(date, "%Y-%m-%d")
+    return t.weekday()
+
+
+def sumValue_2dicts(d1, d2):
+    """
+    Two dictionaries d1 and d2 has same set of keys.
+    The values have type np.array.
+    This function sum two dictionaries together.
+
+    d1 is always full.
+    d2 could be empty.
+    """
+    for k in d1:
+        if k in d2:
+            d1[k] = d1[k] + d2[k]
+    return d1
+
+
+
+
+def MAPE(grnd_truth, estimation):
+    """
+    Cacluate Mean Absolute Percentage Error
+    """
+    T = np.array(grnd_truth)
+    E = np.array(estimation)
+    return np.mean(np.abs(T-E) / T)
