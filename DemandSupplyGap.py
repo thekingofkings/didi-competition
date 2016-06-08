@@ -72,9 +72,9 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="train"):
 
 
 
-def weeklyPattern(DATE_ORDERS_MAP):
+def weeklyPatternByRegion(DATE_ORDERS_MAP):
     """
-    Calculate weekly average
+    Calculate weekly average for different regions.
     """
     weekly_orders = [ {} for i in range(7) ]
     weekly_orders_cnt = np.zeros(7)
