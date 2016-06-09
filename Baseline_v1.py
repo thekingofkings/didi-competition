@@ -11,6 +11,7 @@ Hongjian
 
 from DemandSupplyGap import *
 from Utilities import *
+import pickle
 
 
 def directly_predict(WP_gap, test_gap, target="gap"):
@@ -19,17 +20,23 @@ def directly_predict(WP_gap, test_gap, target="gap"):
     test_gap is map of map.
     """
     print "Directly predict", target
-    grnd_truth = []
-    estimation = []
+    grnd_truth = {} 
+    estimation = {}
 
+    cnt = 0
     for date in test_gap:
         for region in test_gap[date]:
             for tid, observation in enumerate(test_gap[date][region]):
-                if observation != -1:
-                    grnd_truth.append(observation)
-                    estimation.append(WP_gap[getWeekDay(date)][region][tid])
+                if observation > 0:
+                    cnt += 1
+                    if region not in grnd_truth:
+                        grnd_truth[region] = []
+                        estimation[region] = []
 
-    print MAPE(grnd_truth, estimation), len(grnd_truth)
+                    grnd_truth[region].append(observation)
+                    estimation[region].append(WP_gap[getWeekDay(date)][region][tid])
+
+    print MAPE(grnd_truth, estimation), cnt
 
 
 
@@ -39,20 +46,29 @@ def use_supply_demand_predict_gap(WP_supply, WP_demand, test_gap):
     test_gap is map of map.
     """
     print "Predict supply and demand then calculate gap"
-    grnd_truth = []
-    estimation = []
+    grnd_truth = {}
+    estimation = {} 
 
+    cnt = 0
     for date in test_gap:
         for region in test_gap[date]:
             for tid, observation in enumerate(test_gap[date][region]):
-                if observation != -1:
-                    grnd_truth.append(observation)
+                if observation > 0:
+                    cnt += 1
+                    if region not in grnd_truth:
+                        grnd_truth[region] = []
+                        estimation[region] = []
+
+                    grnd_truth[region].append(observation)
 
                     wd = getWeekDay(date)
                     estm = WP_demand[wd][region][tid] - WP_supply[wd][region][tid]
-                    estimation.append(estm)
+                    estimation[region].append(estm)
 
-    print MAPE(grnd_truth, estimation), len(grnd_truth)
+    print MAPE(grnd_truth, estimation), cnt
+    pickle.dump(grnd_truth, open("grnd_trueth.csv", 'w'))
+    pickle.dump(estimation, open("estimation.csv", 'w'))
+
 
 
 
@@ -91,7 +107,7 @@ def generatePrediction_Submission():
             time = line.strip()
             reg = re.match("(\d{4}-\d{2}-\d{2})-(\d+)", time)
             date = reg.groups()[0]
-            tid = int(reg.groups()[1])
+            tid = int(reg.groups()[1]) - 1  # my tid starts from 0 instead of 1
             for rid in range(1, 67):
                 estim = make_prediction(rid, date, tid)
                 fout.write("{0},{1},{2}\n".format(rid, time, estim))

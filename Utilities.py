@@ -65,7 +65,7 @@ def sumValue_2dicts(d1, d2):
     d2 could be empty.
     """
     for k in d1:
-        if k in d2:
+        if k in d2 and len(d2[k]) == len(d1[k]):
             d1[k] = d1[k] + d2[k]
     return d1
 
@@ -76,6 +76,10 @@ def MAPE(grnd_truth, estimation):
     """
     Cacluate Mean Absolute Percentage Error
     """
-    T = np.array(grnd_truth)
-    E = np.array(estimation)
-    return np.mean(np.abs(T-E) / T)
+    res = []
+    for rid in grnd_truth:
+        T = np.array(grnd_truth[rid])
+        E = np.array(estimation[rid])
+        res.append(np.mean(np.abs(T-E) / T))
+    return np.mean(res)
+        

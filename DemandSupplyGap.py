@@ -51,7 +51,7 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="train"):
                 tid = getTimeSlotFromTimestamp(time, date)
 
                 if region_id not in ORDERS_MAP:
-                    ORDERS_MAP[region_id] = np.ones(144) * -1
+                   ORDERS_MAP[region_id] = np.zeros(144)
 
                 if time_series_type == "gap":
                     ORDERS_MAP[region_id][tid] += 1 if driver_id == "NULL" else 0
@@ -63,8 +63,6 @@ def calculateDemandSupplyGap(time_series_type="gap", train_or_test="train"):
                     print time_series_type
                     raise NameError("Wrong time series type!")
         
-        for region in ORDERS_MAP:
-            ORDERS_MAP[region] = map(lambda x: x+1 if x != -1 else x, ORDERS_MAP[region])
         DATE_ORDERS_MAP[date] = ORDERS_MAP
     return DATE_ORDERS_MAP
 
@@ -85,6 +83,8 @@ def weeklyPatternByRegion(DATE_ORDERS_MAP):
 
     for idx, cnt in enumerate(weekly_orders_cnt):
         for region in weekly_orders[idx]:
+            # check time series consistency
+            assert len(weekly_orders[idx][region]) == 144
             weekly_orders[idx][region] /= cnt
 
     return weekly_orders
@@ -93,10 +93,27 @@ def weeklyPatternByRegion(DATE_ORDERS_MAP):
 
 
 
+def dailyPatternByRegion(DATE_ORDERS_MAP):
+    daily_order = {}
+    day_cnt = 0
+    for date in DATE_ORDERS_MAP:
+        daily_order = sumValue_2dicts(DATE_ORDERS_MAP[date], daily_order)
+        day_cnt += 1.0
+
+    for rid in daily_order:
+        assert len(daily_order[rid]) == 144
+        daily_order[rid] /= day_cnt
+
+    return daily_order
+
+
+
 
 if __name__ == '__main__':
     import sys
     TS_TYPE = sys.argv[1]
     r = calculateDemandSupplyGap(TS_TYPE)
-    import pickle
-    pickle.dump(r, open("ORDERS_{0}".format(TS_TYPE), 'w'))
+    # import pickle
+    # pickle.dump(r, open("ORDERS_{0}".format(TS_TYPE), 'w'))
+
+    s = dailyPatternByRegion(r)
