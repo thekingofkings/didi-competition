@@ -66,8 +66,8 @@ def use_supply_demand_predict_gap(WP_supply, WP_demand, test_gap):
                     estimation[region].append(estm)
 
     print MAPE(grnd_truth, estimation), cnt
-    pickle.dump(grnd_truth, open("grnd_trueth.csv", 'w'))
-    pickle.dump(estimation, open("estimation.csv", 'w'))
+    pickle.dump(grnd_truth, open("grnd_truth.pickle", 'w'))
+    pickle.dump(estimation, open("estimation.pickle", 'w'))
 
 
 
